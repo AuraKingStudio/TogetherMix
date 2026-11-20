@@ -84,6 +84,15 @@
   });
   $('copy-link').addEventListener('click', async () => {
     const link = TM.inviteLink(roomId);
+    // Phones: open the share sheet (WhatsApp, Discord, Messages…). Cancelling it is fine.
+    if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+      try {
+        await navigator.share({ title: 'Join my TogetherMix room', url: link });
+        return;
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+      }
+    }
     try {
       await navigator.clipboard.writeText(link);
       TM.toast('Invite link copied');

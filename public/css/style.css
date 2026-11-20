@@ -279,6 +279,15 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
 @media (max-width: 960px) {
   .room-layout { grid-template-columns: 1fr; }
   .pool { max-height: none; }
+  /* One column: put the paste box above the video so it is the first thing you see. */
+  .room-layout { display: flex; flex-direction: column; }
+  .side { display: contents; }
+  .add-form { order: -2; margin-bottom: 0; }
+  #quota { order: -1; margin: 0; }
+}
+@media (pointer: coarse) {
+  /* Bigger tap targets and no iOS zoom-in when typing (needs 16px text). */
+  input, select, .btn { font-size: 16px; min-height: 44px; }
 }
 @media (max-width: 520px) {
   .topbar h1 { white-space: normal; }
