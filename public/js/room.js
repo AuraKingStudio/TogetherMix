@@ -67,6 +67,12 @@
     }
     if (state) renderControls();
   });
+  // Pasting a link adds it straight away: no need to find the Add button.
+  $('add-url').addEventListener('paste', () => {
+    setTimeout(() => {
+      if ($('add-url').value.trim()) $('add-form').requestSubmit();
+    }, 0);
+  });
   $('pool').addEventListener('click', (event) => {
     const button = event.target.closest('button[data-action]');
     if (!button) return;
@@ -417,7 +423,7 @@
     $('add-url').disabled = !addAllowed;
     $('add-btn').disabled = !addAllowed;
     $('add-url').placeholder = addAllowed
-      ? 'Paste a video or playlist link'
+      ? 'Paste a YouTube link here'
       : s.settings.locked ? 'The pool is locked' : 'Only the host can add tracks';
 
     $('settings-btn').hidden = !isHost;

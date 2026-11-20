@@ -146,10 +146,43 @@
 
   // Ads only load when ADSENSE_CLIENT and ADSENSE_SLOT are set on the server.
   // Ad boxes stay hidden otherwise, so the layout stays clean during setup.
+  // Shown when an ad blocker stops the AdSense script. It asks; it never forces.
+  function showAdblockNotice() {
+    if (document.getElementById('adblock-notice')) return;
+    const bar = document.createElement('div');
+    bar.id = 'adblock-notice';
+    bar.className = 'adblock-notice';
+    bar.setAttribute('role', 'status');
+    const text = document.createElement('p');
+    text.innerHTML = '<strong>I run TogetherMix for free, and ads are what pay for it.</strong> '
+      + 'Your ad blocker is hiding them. Please allow ads on this site '
+      + '(uBlock Origin: click its icon, then the big power button. Brave: click the lion, then turn Shields off for this site), then reload.';
+    const reload = document.createElement('button');
+    reload.className = 'btn primary';
+    reload.type = 'button';
+    reload.textContent = "I've allowed ads, reload";
+    reload.addEventListener('click', () => location.reload());
+    const later = document.createElement('button');
+    later.className = 'btn';
+    later.type = 'button';
+    later.textContent = 'Not now';
+    later.addEventListener('click', () => bar.remove());
+    const actions = document.createElement('div');
+    actions.className = 'row';
+    actions.append(reload, later);
+    bar.append(text, actions);
+    document.body.prepend(bar);
+  }
+
   function initAds() {
     const cfg = window.TOGETHERMIX_CONFIG || {};
     const boxes = document.querySelectorAll('[data-ad-slot-box]');
-    if (!/^ca-pub-\d{10,20}$/.test(cfg.adsenseClient || '') || !/^\d{6,20}$/.test(cfg.adsenseSlot || '')) {
+    if (!/^ca-pub-\d{10,20}$/.test(cfg.adsenseClient || '')) return;
+    // With only the publisher ID, the script still loads: AdSense review sees it,
+    // and Auto ads start by themselves once you turn them on in AdSense.
+    const hasSlot = /^\d{6,20}$/.test(cfg.adsenseSlot || '');
+    if (!hasSlot) {
+      loadAdScript(cfg.adsenseClient, []);
       return;
     }
     boxes.forEach((box) => {
@@ -163,10 +196,16 @@
       ins.dataset.fullWidthResponsive = 'true';
       box.querySelector('.ad-inner').appendChild(ins);
     });
+    loadAdScript(cfg.adsenseClient, boxes);
+  }
+
+  function loadAdScript(client, boxes) {
     const script = document.createElement('script');
     script.async = true;
     script.crossOrigin = 'anonymous';
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(cfg.adsenseClient)}`;
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(client)}`;
+    // Ad blockers (uBlock Origin, Brave Shields) stop this request.
+    script.onerror = showAdblockNotice;
     document.head.appendChild(script);
     boxes.forEach(() => {
       (window.adsbygoogle = window.adsbygoogle || []).push({});

@@ -14,8 +14,8 @@
     const button = $('create-btn');
     error.hidden = true;
 
-    const name = $('room-name').value.trim();
     const nickname = $('nickname').value.trim() || 'Guest';
+    const name = $('room-name').value.trim() || `${nickname}'s room`;
     TM.setNickname(nickname);
 
     button.disabled = true;

@@ -22,7 +22,7 @@ function startHome() {
     TM.setNickname(nickname);
     try {
       const { id, hostToken } = window.TMP2P.createLocalRoom({
-        name: $('room-name').value.trim(),
+        name: $('room-name').value.trim() || `${nickname}'s room`,
         settings: TM.readSettingsFields($('settings-fields')),
         memberId: TM.memberId(),
       });
