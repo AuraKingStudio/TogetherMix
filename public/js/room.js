@@ -364,6 +364,7 @@
     renderPool();
     renderControls();
     applyMood();
+    if (window.TMParty) window.TMParty.render(state, { call, you, isHost, serverNow });
   }
 
   // The background pulses while music plays. YouTube's audio can't be read from
@@ -415,7 +416,7 @@
     const mix = state.settings.order === 'mix';
     const total = state.members.reduce((sum, m) => sum + (m.share ?? 50), 0);
     for (const m of state.members) {
-      let label = m.nickname + (m.isHost ? ' · host' : '');
+      let label = `${m.nickname}${m.isHost ? ' · host' : ''} · Lv ${m.level || 1}`;
       if (mix) label += ` · ${total ? Math.round(((m.share ?? 50) / total) * 100) : 0}%`;
       const chip = el('li', `chip${m.id === you ? ' me' : ''}${mix && isHost ? ' clickable' : ''}`, label);
       if (mix && isHost) {

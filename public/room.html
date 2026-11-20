@@ -69,6 +69,27 @@
         <ul id="members" class="chips"></ul>
       </div>
       <p id="rules" class="muted small"></p>
+
+      <div class="me-card">
+        <strong id="me-level">Lv 1 · Rookie</strong>
+        <div class="xp-bar" title="XP to the next level"><span id="me-xp"></span></div>
+        <span id="me-xp-text" class="muted small"></span>
+        <span id="me-ratio" class="muted small"></span>
+      </div>
+
+      <details class="game-corner" open>
+        <summary>🎮 Game corner <span class="muted small">winner picks the next song</span></summary>
+        <canvas id="game-canvas" width="640" height="200" aria-label="Mini-game stage"></canvas>
+        <div class="game-actions">
+          <button class="btn" type="button" data-game="reaction">⚡ Quick Draw</button>
+          <button class="btn" type="button" data-game="mash">👊 Tap Frenzy</button>
+          <button class="btn primary" type="button" data-game="">🎲 Random game</button>
+        </div>
+        <button id="tap-btn" class="btn tap-btn" type="button" hidden>TAP!</button>
+        <p class="muted small"><span id="tap-count" hidden>0</span></p>
+        <div id="game-pick" class="game-pick"></div>
+        <p class="muted small">Quick Draw: tap the moment it says GO (too early = out). Tap Frenzy: tap as fast as you can for 5 seconds. Space bar works too.</p>
+      </details>
     </section>
 
     <aside class="side">
@@ -79,6 +100,9 @@
       <p id="quota" class="muted small"></p>
       <h3>Pool</h3>
       <ol id="pool" class="pool"></ol>
+
+      <h3>History <span class="muted small">best rated first · click to replay</span></h3>
+      <ol id="history" class="history"></ol>
 
       <div class="ad-box" data-ad-slot-box hidden>
         <span class="ad-label">Advertisement</span>
@@ -104,6 +128,7 @@
   <script src="/config.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
+  <script src="/js/party.js"></script>
   <script src="/js/room.js"></script>
 </body>
 </html>

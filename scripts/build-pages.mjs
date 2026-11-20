@@ -52,7 +52,7 @@ const fixLinks = (html) => html
   .replace(/href="\/"/g, 'href="./"')
   .replace(/https:\/\/…\/r\/abcdefghjk/g, 'https://…/#abcdefghjk');
 
-const [indexHtml, roomHtml, privacyHtml, css, commonJs, roomJs, homeJs] = await Promise.all([
+const [indexHtml, roomHtml, privacyHtml, css, commonJs, roomJs, homeJs, partyJs] = await Promise.all([
   read('public/index.html'),
   read('public/room.html'),
   read('public/privacy.html'),
@@ -60,6 +60,7 @@ const [indexHtml, roomHtml, privacyHtml, css, commonJs, roomJs, homeJs] = await 
   read('public/js/common.js'),
   read('public/js/room.js'),
   read('pages/js/home.js'),
+  read('public/js/party.js'),
 ]);
 
 const config = {
@@ -101,6 +102,9 @@ ${safe(commonJs)}
   </script>
   <script>
 ${safe(p2pJs)}
+  </script>
+  <script>
+${safe(partyJs)}
   </script>
   <script>
 ${safe(homeJs)}
