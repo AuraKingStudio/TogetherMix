@@ -54,6 +54,14 @@
     scrubbing = false;
     call('control', { action: 'seek', position: Number(event.target.value) });
   });
+  // Room volume is shared: moving it changes the volume for everyone, live.
+  let volumeTimer = null;
+  $('volume').addEventListener('input', (event) => {
+    const volume = Number(event.target.value);
+    if (playerReady) player.setVolume(volume);
+    clearTimeout(volumeTimer);
+    volumeTimer = setTimeout(() => call('control', { action: 'volume', volume }), 120);
+  });
   $('add-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const input = $('add-url');
@@ -253,6 +261,9 @@
   // Makes the local player match the room state: load, play/pause, and seek when drifting.
   function syncPlayer(force) {
     if (!state || !playerReady) return;
+    const volume = state.playback.volume ?? 80;
+    if (document.activeElement !== $('volume')) $('volume').value = String(volume);
+    if (player.getVolume() !== volume) player.setVolume(volume);
     const pb = state.playback;
 
     if (pb.trackId !== loadedTrackId) {

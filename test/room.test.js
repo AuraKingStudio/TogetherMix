@@ -120,11 +120,29 @@ test('addPolicy host and locked block non-host adds', () => {
   assert.throws(() => add(locked, ME, { isHost: true }), /locked/);
 });
 
-test('first added track is cued, not auto-played', () => {
+test('first added track plays straight away when autoplay is on', () => {
   const room = newRoom();
   const t = add(room, ME);
   assert.equal(room.playback.trackId, t.id);
+  assert.equal(room.playback.playing, true);
+});
+
+test('first added track is only cued when autoplay is off', () => {
+  const room = newRoom({ autoplay: false });
+  add(room, ME);
   assert.equal(room.playback.playing, false);
+});
+
+test('room volume is shared, validated and kept across tracks', () => {
+  const room = newRoom();
+  add(room, ME);
+  add(room, ME);
+  rooms.applyControl(room, { action: 'volume', memberId: ME, isHost: false, volume: 35, now: 1 });
+  assert.equal(room.playback.volume, 35);
+  rooms.applyControl(room, { action: 'skip', memberId: ME, isHost: true, now: 2 });
+  assert.equal(room.playback.volume, 35);
+  assert.throws(() => rooms.applyControl(room, { action: 'volume', memberId: ME, isHost: false, volume: 150, now: 3 }));
+  assert.equal(rooms.restoreRoom(rooms.serializeRoom(room)).playback.volume, 35);
 });
 
 test('playing and pausing track position on the server clock', () => {
@@ -142,7 +160,7 @@ test('playing and pausing track position on the server clock', () => {
 });
 
 test('play accepts the position reported by the local player', () => {
-  const room = newRoom();
+  const room = newRoom({ autoplay: false });
   add(room, ME);
   rooms.applyControl(room, { action: 'play', memberId: ME, isHost: false, position: 75, now: 0 });
   assert.equal(rooms.currentPosition(room, 1000), 76);
@@ -249,7 +267,7 @@ test('people can only remove their own tracks unless they are host', () => {
 });
 
 test('last person leaving pauses the room', () => {
-  const room = newRoom();
+  const room = newRoom({ autoplay: false });
   add(room, ME);
   online(room, ME);
   rooms.applyControl(room, { action: 'play', memberId: ME, isHost: false, now: 0 });
