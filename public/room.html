@@ -31,6 +31,7 @@
   <header class="topbar">
     <a href="/" class="brand">TogetherMix</a>
     <h1 id="room-name">Loading…</h1>
+    <span class="chip private" title="Only people with the invite link can get in">🔒 Private room</span>
     <span id="status" class="chip status warn">Connecting…</span>
     <div class="top-actions">
       <button id="copy-link" class="btn" type="button">Copy invite link</button>
@@ -47,6 +48,7 @@
         <p class="muted small">Now playing</p>
         <h2 id="now-title">Connecting…</h2>
         <p class="muted small" id="now-by"></p>
+        <p class="genre small" id="genre"></p>
       </div>
 
       <div class="transport">
@@ -56,8 +58,9 @@
         <input id="seek" type="range" min="0" max="0" step="0.5" value="0" aria-label="Seek" disabled>
         <span id="time" class="mono small">0:00 / 0:00</span>
         <label class="volume" title="Room volume: changes it for everyone">
-          <span aria-hidden="true">🔊</span>
-          <input id="volume" type="range" min="0" max="100" step="1" value="80" aria-label="Room volume (everyone)">
+          <span class="volume-icon" aria-hidden="true">🔊</span>
+          <input id="volume" class="slider" type="range" min="0" max="100" step="1" value="80" style="--fill: 80%" aria-label="Room volume (everyone)">
+          <span id="volume-pct" class="mono small">80%</span>
         </label>
       </div>
 

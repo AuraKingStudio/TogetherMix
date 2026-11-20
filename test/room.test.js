@@ -127,6 +127,26 @@ test('first added track plays straight away when autoplay is on', () => {
   assert.equal(room.playback.playing, true);
 });
 
+test('auto mix rolls by share and plays every track once per cycle', () => {
+  const room = newRoom({ order: 'mix' });
+  const OTHER = 'otherotherother01';
+  for (let i = 0; i < 3; i++) add(room, ME);
+  for (let i = 0; i < 3; i++) add(room, OTHER);
+  rooms.setShare(room, OTHER, 0, 1);
+  // With OTHER at 0%, ME's tracks all come first, in the order they were added.
+  const seen = [room.playback.trackId];
+  for (let i = 0; i < 5; i++) {
+    rooms.applyControl(room, { action: 'skip', memberId: ME, isHost: true, now: 2 + i });
+    seen.push(room.playback.trackId);
+  }
+  const owners = seen.map((id) => room.tracks.find((t) => t.id === id).memberId);
+  assert.deepEqual(owners, [ME, ME, ME, OTHER, OTHER, OTHER]);
+  assert.equal(new Set(seen).size, 6);
+  assert.throws(() => rooms.setShare(room, ME, 101, 9));
+  const back = rooms.restoreRoom(rooms.serializeRoom(room));
+  assert.equal(back.shares.get(OTHER), 0);
+});
+
 test('first added track is only cued when autoplay is off', () => {
   const room = newRoom({ autoplay: false });
   add(room, ME);

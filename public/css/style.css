@@ -302,3 +302,104 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
   .volume { flex-basis: 100%; order: 11; }
   .volume input { flex: 1; width: auto; }
 }
+
+/* ---- motion and mood ------------------------------------------------------ */
+
+:root { --beat: 0.55s; --mood-hue: 228; }
+
+/* Soft glow behind everything; it breathes to the beat while music plays. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -20vmax;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40vmax 40vmax at 20% 15%, hsla(var(--mood-hue), 80%, 60%, 0.16), transparent 70%),
+    radial-gradient(45vmax 45vmax at 85% 80%, hsla(calc(var(--mood-hue) + 50), 80%, 60%, 0.12), transparent 70%);
+  transition: background 1.2s ease;
+  animation: drift 24s ease-in-out infinite alternate;
+}
+body.is-playing::before { animation: drift 24s ease-in-out infinite alternate, beat var(--beat) ease-out infinite; }
+@keyframes drift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(3vmax, -2vmax, 0); } }
+@keyframes beat { 0% { opacity: 1; filter: brightness(1.35); } 60%, 100% { opacity: 0.75; filter: brightness(1); } }
+
+body.is-playing .player-frame { box-shadow: 0 0 0 1px hsla(var(--mood-hue), 80%, 65%, 0.35), 0 18px 60px -20px hsla(var(--mood-hue), 80%, 55%, 0.55); }
+.player-frame { transition: box-shadow 0.8s ease; }
+
+.genre { color: hsl(var(--mood-hue), 80%, 75%); text-transform: capitalize; margin: 2px 0 0; min-height: 1em; }
+.chip.private { border-color: transparent; background: rgba(255, 255, 255, 0.06); color: var(--muted); }
+
+/* Buttons: lift on hover, press down on click. */
+.btn { transition: transform 0.12s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease; }
+.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.6); }
+.btn:active:not(:disabled) { transform: translateY(1px) scale(0.98); box-shadow: none; }
+.btn.primary:hover:not(:disabled) { box-shadow: 0 8px 24px -8px var(--accent); }
+input, select { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+input:focus, select:focus { box-shadow: 0 0 0 3px rgba(124, 156, 255, 0.25); }
+
+/* Things appear gently instead of popping in. */
+.card, .now-playing, .pool li, .chips li, .toast, .adblock-notice { animation: rise 0.35s ease both; }
+.pool li:nth-child(2) { animation-delay: 0.03s; } .pool li:nth-child(3) { animation-delay: 0.06s; }
+.pool li:nth-child(4) { animation-delay: 0.09s; } .pool li:nth-child(n+5) { animation-delay: 0.12s; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.chip.clickable { cursor: pointer; }
+.chip.clickable:hover { border-color: var(--accent); }
+
+/* The playing track glows to the beat in the pool. */
+body.is-playing .pool li.current { animation: rise 0.35s ease both, glow calc(var(--beat) * 2) ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 0 1px hsla(var(--mood-hue), 80%, 65%, 0.6), 0 0 22px -6px hsla(var(--mood-hue), 80%, 60%, 0.7); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before { animation: none !important; transition: none !important; }
+}
+
+/* ---- custom volume slider ----------------------------------------------------- */
+
+.volume { flex: 1 1 240px; gap: 10px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.05); }
+.volume-icon { font-size: 1.2rem; }
+#volume-pct { min-width: 3.2em; text-align: right; }
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  width: auto;
+  min-width: 120px;
+  height: 28px;
+  min-height: 0;
+  background: transparent;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+}
+.slider:focus { box-shadow: none; outline: none; }
+.slider::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, hsl(var(--mood-hue), 80%, 68%) var(--fill, 50%), rgba(255, 255, 255, 0.12) var(--fill, 50%));
+}
+.slider::-moz-range-track { height: 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); }
+.slider::-moz-range-progress { height: 10px; border-radius: 999px; background: hsl(var(--mood-hue), 80%, 68%); }
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid hsl(var(--mood-hue), 80%, 62%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  transition: transform 0.12s ease;
+}
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid hsl(var(--mood-hue), 80%, 62%);
+}
+.slider:active::-webkit-slider-thumb, .slider:hover::-webkit-slider-thumb { transform: scale(1.15); }
+.slider:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(124, 156, 255, 0.4); }
+@media (max-width: 520px) {
+  .volume { flex-basis: 100%; }
+}

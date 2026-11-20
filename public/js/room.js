@@ -55,12 +55,22 @@
     call('control', { action: 'seek', position: Number(event.target.value) });
   });
   // Room volume is shared: moving it changes the volume for everyone, live.
+  // While you drag (and shortly after), updates from the room must not move the
+  // slider back, or it fights your finger and jumps around.
   let volumeTimer = null;
+  let volumeTouchedAt = 0;
+  const showVolume = (v) => {
+    $('volume').value = String(v);
+    $('volume').style.setProperty('--fill', `${v}%`);
+    $('volume-pct').textContent = `${v}%`;
+  };
   $('volume').addEventListener('input', (event) => {
     const volume = Number(event.target.value);
+    volumeTouchedAt = Date.now();
+    showVolume(volume);
     if (playerReady) player.setVolume(volume);
     clearTimeout(volumeTimer);
-    volumeTimer = setTimeout(() => call('control', { action: 'volume', volume }), 120);
+    volumeTimer = setTimeout(() => call('control', { action: 'volume', volume }), 150);
   });
   $('add-form').addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -261,9 +271,11 @@
   // Makes the local player match the room state: load, play/pause, and seek when drifting.
   function syncPlayer(force) {
     if (!state || !playerReady) return;
-    const volume = state.playback.volume ?? 80;
-    if (document.activeElement !== $('volume')) $('volume').value = String(volume);
-    if (player.getVolume() !== volume) player.setVolume(volume);
+    if (Date.now() - volumeTouchedAt > 1500) {
+      const volume = state.playback.volume ?? 80;
+      if (Number($('volume').value) !== volume) showVolume(volume);
+      if (player.getVolume() !== volume) player.setVolume(volume);
+    }
     const pb = state.playback;
 
     if (pb.trackId !== loadedTrackId) {
@@ -351,12 +363,40 @@
     renderNowPlaying();
     renderPool();
     renderControls();
+    applyMood();
+  }
+
+  // The background pulses while music plays. YouTube's audio can't be read from
+  // the page, so tempo and colour come from the genre guessed from the title.
+  const GENRES = [
+    [/lo-?fi|chill|ambient|sleep|study|relax/i, 'chill', 72, 265],
+    [/jazz|soul|r&b|rnb|blues/i, 'soul', 88, 30],
+    [/hip ?hop|rap|trap|drill/i, 'hip hop', 92, 285],
+    [/phonk/i, 'phonk', 130, 320],
+    [/drum ?(and|&|n) ?bass|dnb|jungle/i, 'drum & bass', 172, 190],
+    [/house|techno|edm|trance|dance|remix|club/i, 'electronic', 126, 200],
+    [/metal|core\b/i, 'metal', 150, 0],
+    [/rock|punk|grunge/i, 'rock', 124, 15],
+    [/k-?pop|j-?pop|pop/i, 'pop', 116, 330],
+    [/classical|piano|orchestra|symphony/i, 'classical', 66, 45],
+    [/reggae|afro|latin|reggaeton|salsa/i, 'world', 98, 140],
+  ];
+  function applyMood() {
+    const s = state;
+    const track = s.tracks.find((t) => t.id === s.playback.trackId);
+    const match = track && GENRES.find(([re]) => re.test(track.title));
+    const [, genre, bpm, hue] = match || [null, 'music', 110, 228];
+    const root = document.documentElement.style;
+    root.setProperty('--beat', `${(60 / bpm).toFixed(3)}s`);
+    root.setProperty('--mood-hue', String(hue));
+    document.body.classList.toggle('is-playing', Boolean(track && s.playback.playing));
+    $('genre').textContent = track ? `${genre} · ~${bpm} bpm` : '';
   }
 
   function describeRules(s) {
     const st = s.settings;
     const parts = [];
-    parts.push({ 'round-robin': 'Turns between mixes', shuffle: 'Shuffled', added: 'In the order added' }[st.order]);
+    parts.push({ 'round-robin': 'Turns between mixes', shuffle: 'Shuffled', added: 'In the order added', mix: 'Auto mix by % share' }[st.order]);
     if (st.maxPerMember) parts.push(`max ${st.maxPerMember} per person`);
     if (st.addPolicy === 'host') parts.push('only the host adds');
     if (st.controls === 'host') parts.push('only the host controls playback');
@@ -371,9 +411,22 @@
   function renderMembers() {
     const list = $('members');
     list.textContent = '';
+    // Auto mix: show each person's chance that their track plays next.
+    const mix = state.settings.order === 'mix';
+    const total = state.members.reduce((sum, m) => sum + (m.share ?? 50), 0);
     for (const m of state.members) {
-      const label = m.nickname + (m.isHost ? ' · host' : '');
-      list.appendChild(el('li', `chip${m.id === you ? ' me' : ''}`, label));
+      let label = m.nickname + (m.isHost ? ' · host' : '');
+      if (mix) label += ` · ${total ? Math.round(((m.share ?? 50) / total) * 100) : 0}%`;
+      const chip = el('li', `chip${m.id === you ? ' me' : ''}${mix && isHost ? ' clickable' : ''}`, label);
+      if (mix && isHost) {
+        chip.title = 'Click to change how often their tracks get picked';
+        chip.addEventListener('click', () => {
+          const answer = window.prompt(`Share for ${m.nickname} (0 = never, 100 = most often):`, String(m.share ?? 50));
+          if (answer === null) return;
+          call('setShare', { member: m.id, share: Number(answer) });
+        });
+      }
+      list.appendChild(chip);
     }
   }
 
