@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Room · TogetherMix</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="room-page">
+  <section id="gate" class="overlay">
+    <form id="enter-form" class="card gate-card">
+      <h1>Join the room</h1>
+      <p class="muted">Pick a nickname. No account needed.</p>
+      <label class="field"><span>Nickname</span>
+        <input id="nick-input" maxlength="24" required autocomplete="nickname">
+      </label>
+      <button type="submit" class="btn primary">Enter room</button>
+      <p class="muted small">Tapping Enter lets your browser start playback with sound.</p>
+    </form>
+  </section>
+
+  <section id="fatal" class="overlay" hidden>
+    <div class="card gate-card">
+      <h1>Can't open this room</h1>
+      <p id="fatal-message" class="error"></p>
+      <a class="btn" href="/">Back to TogetherMix</a>
+    </div>
+  </section>
+
+  <header class="topbar">
+    <a href="/" class="brand">TogetherMix</a>
+    <h1 id="room-name">Loading…</h1>
+    <span id="status" class="chip status warn">Connecting…</span>
+    <div class="top-actions">
+      <button id="copy-link" class="btn" type="button">Copy invite link</button>
+      <button id="rename-btn" class="btn" type="button">Rename</button>
+      <button id="settings-btn" class="btn" type="button" hidden>Settings</button>
+    </div>
+  </header>
+
+  <main class="room-layout">
+    <section class="stage">
+      <div class="player-frame"><div id="player"></div></div>
+
+      <div class="now-playing">
+        <p class="muted small">Now playing</p>
+        <h2 id="now-title">Connecting…</h2>
+        <p class="muted small" id="now-by"></p>
+      </div>
+
+      <div class="transport">
+        <button id="play-btn" class="btn primary" type="button" disabled>Play</button>
+        <button id="skip-btn" class="btn" type="button" disabled>Skip</button>
+        <button id="sync-btn" class="btn" type="button" disabled>Sync</button>
+        <input id="seek" type="range" min="0" max="0" step="0.5" value="0" aria-label="Seek" disabled>
+        <span id="time" class="mono small">0:00 / 0:00</span>
+      </div>
+
+      <div class="members">
+        <h3>In the room</h3>
+        <ul id="members" class="chips"></ul>
+      </div>
+      <p id="rules" class="muted small"></p>
+    </section>
+
+    <aside class="side">
+      <form id="add-form" class="row add-form">
+        <input id="add-url" type="text" maxlength="300" autocomplete="off" placeholder="Paste a video or playlist link" disabled>
+        <button id="add-btn" class="btn primary" type="submit" disabled>Add</button>
+      </form>
+      <p id="quota" class="muted small"></p>
+      <h3>Pool</h3>
+      <ol id="pool" class="pool"></ol>
+
+      <div class="ad-box" data-ad-slot-box hidden>
+        <span class="ad-label">Advertisement</span>
+        <div class="ad-inner"></div>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="settings-dialog">
+    <form id="settings-form" class="stack">
+      <h2>Room settings</h2>
+      <p class="muted small">Changes apply to everyone in the room straight away.</p>
+      <div id="settings-fields" class="fields"></div>
+      <div class="row end">
+        <button id="settings-cancel" class="btn" type="button">Cancel</button>
+        <button class="btn primary" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="/config.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/room.js"></script>
+</body>
+</html>

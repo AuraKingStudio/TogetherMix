@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TogetherMix · Listen to your friends' mixes, together</title>
+  <meta name="description" content="Create a room, share the invite link, and build one shared pool of YouTube music mixes. Everyone watches and listens in sync.">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="home">
+  <header class="hero">
+    <a class="brand" href="/">TogetherMix</a>
+    <h1>Your friends' mixes, one shared pool, all in sync.</h1>
+    <p class="lead">Create a room, send the invite link to your group, and everyone adds their favourite YouTube tracks. Press play and the whole group hears the same thing at the same moment. No accounts.</p>
+  </header>
+
+  <main class="home-grid">
+    <section class="card">
+      <h2>Create a room</h2>
+      <form id="create-form" class="stack">
+        <label class="field"><span>Room name</span>
+          <input id="room-name" maxlength="50" required placeholder="Friday night mix">
+        </label>
+        <label class="field"><span>Your nickname</span>
+          <input id="nickname" maxlength="24" required autocomplete="nickname" placeholder="Kiels">
+        </label>
+        <details open>
+          <summary>Room settings</summary>
+          <div id="settings-fields" class="fields"></div>
+        </details>
+        <button id="create-btn" class="btn primary" type="submit">Create room</button>
+        <p id="create-error" class="error" hidden></p>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Join a room</h2>
+      <p class="muted">Paste the invite link a friend sent you.</p>
+      <form id="join-form" class="row">
+        <input id="join-input" placeholder="https://…/r/abcdefghjk" aria-label="Invite link">
+        <button class="btn" type="submit">Join</button>
+      </form>
+      <p id="join-error" class="error" hidden></p>
+
+      <h3>How it works</h3>
+      <ol class="steps">
+        <li>Create a room and pick the rules: who adds, play order, skip voting and more.</li>
+        <li>Send the invite link. Friends open it and choose a nickname.</li>
+        <li>Everyone adds their mix. Round-robin plays one track from each mix in turn.</li>
+        <li>Anyone can play, pause, seek or vote to skip, depending on the rules.</li>
+      </ol>
+    </section>
+  </main>
+
+  <div class="ad-box wide" data-ad-slot-box hidden>
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-inner"></div>
+  </div>
+
+  <footer class="site-footer">
+    <a href="/privacy.html">Privacy</a>
+    <span>Videos play through the official YouTube player. Nothing is downloaded or re-hosted.</span>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="/config.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/index.js"></script>
+</body>
+</html>
