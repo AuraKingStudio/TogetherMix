@@ -6,7 +6,8 @@
   const roomMatch = location.pathname.match(/^\/r\/([a-z0-9]{10})\/?$/i);
   const roomId = roomMatch ? roomMatch[1].toLowerCase() : null;
 
-  const YT = { UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 };
+  // Player state values. The global `YT` is the YouTube API object, so this must not shadow it.
+  const PS = { UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 };
   const DRIFT_SECONDS = 1.5;
   const SUPPRESS_MS = 1200;
 
@@ -206,7 +207,8 @@
   }
 
   function createPlayer() {
-    player = new YT.Player('player', {
+    if (player) return;
+    player = new window.YT.Player('player', {
       width: '100%',
       height: '100%',
       playerVars: { rel: 0, playsinline: 1, modestbranding: 1, origin: location.origin },
@@ -253,12 +255,12 @@
     if (!loadedTrackId) return;
 
     const ps = player.getPlayerState();
-    const live = ps === YT.PLAYING || ps === YT.PAUSED || ps === YT.BUFFERING;
+    const live = ps === PS.PLAYING || ps === PS.PAUSED || ps === PS.BUFFERING;
 
-    if (pb.playing && ps !== YT.PLAYING && ps !== YT.BUFFERING && ps !== YT.ENDED) {
+    if (pb.playing && ps !== PS.PLAYING && ps !== PS.BUFFERING && ps !== PS.ENDED) {
       suppressEvents();
       player.playVideo();
-    } else if (!pb.playing && (ps === YT.PLAYING || ps === YT.BUFFERING)) {
+    } else if (!pb.playing && (ps === PS.PLAYING || ps === PS.BUFFERING)) {
       suppressEvents();
       player.pauseVideo();
     }
@@ -274,15 +276,15 @@
   // Forwards the user's native player actions (YouTube's own controls) to the room.
   function onPlayerState(event) {
     if (!state || !loadedTrackId) return;
-    if (event.data === YT.ENDED) {
+    if (event.data === PS.ENDED) {
       socket.emit('ended', { trackId: loadedTrackId });
       return;
     }
     if (Date.now() < suppressUntil) return;
     const shouldPlay = state.playback.playing;
-    if (event.data === YT.PLAYING && !shouldPlay) {
+    if (event.data === PS.PLAYING && !shouldPlay) {
       call('control', { action: 'play', position: player.getCurrentTime() });
-    } else if (event.data === YT.PAUSED && shouldPlay) {
+    } else if (event.data === PS.PAUSED && shouldPlay) {
       call('control', { action: 'pause', position: player.getCurrentTime() });
     }
   }
