@@ -180,6 +180,10 @@
     setNickname: (name) => store.set(KEY_NICK, name),
     hostToken: (roomId) => store.get(`tm.host.${roomId}`),
     saveHostToken: (roomId, token) => store.set(`tm.host.${roomId}`, token),
+    // The static build has no /r/<id> route, so rooms live at room.html#<id>.
+    inviteLink: (roomId) => ((window.TOGETHERMIX_CONFIG || {}).staticSite
+      ? new URL(`room.html#${roomId}`, location.href).href
+      : `${location.origin}/r/${roomId}`),
     formatTime,
     toast,
     postJson,

@@ -3,7 +3,9 @@
 
   const TM = window.TM;
   const $ = (id) => document.getElementById(id);
-  const roomMatch = location.pathname.match(/^\/r\/([a-z0-9]{10})\/?$/i);
+  // Server version: /r/<id>. Static (GitHub Pages) version: room.html#<id>.
+  const roomMatch = location.pathname.match(/^\/r\/([a-z0-9]{10})\/?$/i)
+    || location.hash.match(/^#([a-z0-9]{10})$/i);
   const roomId = roomMatch ? roomMatch[1].toLowerCase() : null;
 
   // Player state values. The global `YT` is the YouTube API object, so this must not shadow it.
@@ -75,7 +77,7 @@
     }
   });
   $('copy-link').addEventListener('click', async () => {
-    const link = `${location.origin}/r/${roomId}`;
+    const link = TM.inviteLink(roomId);
     try {
       await navigator.clipboard.writeText(link);
       TM.toast('Invite link copied');
