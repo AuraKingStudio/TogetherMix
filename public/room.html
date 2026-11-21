@@ -42,7 +42,13 @@
 
   <main class="room-layout">
     <section class="stage">
-      <div class="player-frame"><div id="player"></div></div>
+      <div class="player-frame">
+        <div id="player"></div>
+        <div id="player-overlay" class="player-overlay">
+          <p id="overlay-text">🎵 Paste a YouTube link to start the music</p>
+          <button id="overlay-play" class="btn primary big" type="button" hidden>▶ Tap to start the music</button>
+        </div>
+      </div>
 
       <div class="now-playing">
         <p class="muted small">Now playing</p>

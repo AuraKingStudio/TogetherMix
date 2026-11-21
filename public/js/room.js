@@ -280,6 +280,7 @@
 
     if (pb.trackId !== loadedTrackId) {
       loadedTrackId = pb.trackId;
+      loadedAt = Date.now();
       suppressEvents();
       if (!pb.trackId) {
         player.stopVideo();
@@ -335,9 +336,34 @@
     TM.toast('That video cannot be played here. Skipping it.', true);
   }
 
+  // Covers the black player: an empty pool gets a hint, and when the browser
+  // blocks music from starting on its own (common on phones), a big button
+  // lets one tap start it.
+  let loadedAt = 0;
+  function renderOverlay() {
+    const pb = state.playback;
+    const ps = playerReady && loadedTrackId ? player.getPlayerState() : null;
+    const stuck = pb.playing && loadedTrackId && Date.now() - loadedAt > 2500
+      && (ps === PS.UNSTARTED || ps === PS.CUED);
+    const empty = !pb.trackId;
+    $('player-overlay').hidden = !(empty || stuck || !playerReady);
+    $('overlay-play').hidden = !stuck;
+    $('overlay-text').textContent = stuck
+      ? 'Your browser paused the music until you tap.'
+      : !playerReady ? 'Loading the player…'
+      : state.tracks.length ? 'Press Play to start the mix' : '🎵 Paste a YouTube link to start the music';
+  }
+  $('overlay-play').addEventListener('click', () => {
+    if (!playerReady) return;
+    suppressEvents();
+    player.playVideo();
+    syncPlayer(true);
+  });
+
   function tick() {
     if (!state) return;
     renderTime();
+    renderOverlay();
     if (playerReady && ++tickCount % 4 === 0) syncPlayer(false);
   }
 
